@@ -16,10 +16,11 @@ export class CreatePokemonDto {
   @IsNotEmpty()
   type: string;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @IsNotEmpty()
-  hp: number;
+  hp?: number;
 
   @IsOptional()
   @IsArray()
