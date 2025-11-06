@@ -1,17 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { PaginationDto } from 'src/shared/dtos/pagination.dto';
 import { PokemonResponse } from 'src/shared/interfaces/pokemons.interface';
 import { Pokemon } from './entities/pokemon.entity';
 import { SinglePokemonResponse } from 'src/shared/interfaces/pokemon.interface';
+import { response } from 'express';
 
 @Injectable()
 export class PokemonsService {
-  private paginatedPokemonCached = new Map<string, Pokemon[]>();
+  paginatedPokemonCached = new Map<string, Pokemon[]>();
 
   create(createPokemonDto: CreatePokemonDto) {
-    return 'This action adds a new pokemon';
+    return Promise.resolve(
+      `This action adds a new pokemon ${createPokemonDto.name}`,
+    );
   }
 
   async findAll(paginationDto: PaginationDto): Promise<Pokemon[]> {
@@ -44,16 +47,20 @@ export class PokemonsService {
   }
 
   update(id: number, updatePokemonDto: UpdatePokemonDto) {
-    return `This action updates a #${id} pokemon`;
+    return Promise.resolve(`This action updates a #${id} pokemon`);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+    return Promise.resolve(`This action removes a #${id} pokemon`);
   }
 
   private async getPokemonInformation(id: number): Promise<Pokemon> {
-    const respoonse = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    const data = (await respoonse.json()) as SinglePokemonResponse;
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    if (response.status === 404) {
+      throw new NotFoundException('Pokemon not found');
+    }
+
+    const data = (await response.json()) as SinglePokemonResponse;
 
     return {
       id: data.id,
